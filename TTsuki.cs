@@ -6,6 +6,5 @@ namespace Tsukikage
 {
     public class TTsuki
     {
-        
     }
 }
