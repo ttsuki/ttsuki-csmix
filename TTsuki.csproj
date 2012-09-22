@@ -21,6 +21,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -42,14 +43,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="KeyboardHook.cs" />
-    <Compile Include="MessageThread.cs" />
+    <Compile Include="Messaging\MessageThread.cs" />
+    <Compile Include="Messaging\MessageWindow.cs" />
     <Compile Include="TTsuki.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MessageWindow.cs" />
+    <Compile Include="WinMM\AcmMp3Decoder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="WinMM\MidiIO.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="WinMM\WaveDSP.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="WinMM\WaveIO.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Messaging\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

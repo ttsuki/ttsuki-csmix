@@ -75,7 +75,7 @@ namespace Tsukikage.Windows.Messaging
         static extern bool PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
     }
 
-
+#if EXAMPLE_CODE
     class TEST
     {
         static void Main()
@@ -89,4 +89,5 @@ namespace Tsukikage.Windows.Messaging
             }
         }
     }
+#endif
 }
