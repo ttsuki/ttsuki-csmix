@@ -8,8 +8,8 @@ C#でWindowsプログラムを書くときに、
 http://www.kmonos.net/nysl/
 
 ## 今できること
-・Keyboard Hook - 特定のキー入力を他のキー入力に変更したり。
+- Keyboard Hook - 特定のキー入力を他のキー入力に変更したり。
 
-できる予定のこと
-・midiOutXXXX, midiInXXXX API呼び出しによる Midi I/O
-・ACMを使ったMP3ファイルのデコード
+##できる予定のこと
+- midiOutXXXX, midiInXXXX API呼び出しによる Midi I/O
+- ACMを使ったMP3ファイルのデコード
