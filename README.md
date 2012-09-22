@@ -37,6 +37,8 @@ D. 以上の３項は、ソース・実行バイナリの双方に適用されます。
 - Windows Messaging [View Directory](https://github.com/ttsuki/ttsuki/tree/master/Messaging)
  - Windows Messaging Window for Multimedia callback. [View Source](https://github.com/ttsuki/ttsuki/blob/master/Messaging/MessageWindow.cs)
  - Windows Messaging Thread for Multimedia callback. [View Source](https://github.com/ttsuki/ttsuki/blob/master/Messaging/MessageThread.cs)
+- Net [View Directory](https://github.com/ttsuki/ttsuki/tree/master/Net)
+ - Wake On Lan. [View Source](https://github.com/ttsuki/ttsuki/blob/master/Net/WakeOnLan.cs)
 - Keyboard Hook - 特定のキー入力を他のキー入力に変更したり。[View Source](https://github.com/ttsuki/ttsuki/blob/master/KeyboardHook.cs)
 
 ##できる予定のこと
