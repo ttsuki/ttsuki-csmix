@@ -1,46 +1,46 @@
-
+ï»¿
 # TTSUKI LIB
 TTsuki's Miscellaneous C# Windows Library. 
 
-C#‚ÅWindowsƒvƒƒOƒ‰ƒ€‚ğ‘‚­‚Æ‚«‚ÉA‚¿‚å‚Á‚Æ•Ö—˜‚É‚·‚éƒ‰ƒCƒuƒ‰ƒŠ.
+C#ã§Windowsãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚’æ›¸ãã¨ãã«ã€ã¡ã‚‡ã£ã¨ä¾¿åˆ©ã«ã™ã‚‹ãƒ©ã‚¤ãƒ–ãƒ©ãƒª.
 
-‚È‚é‚×‚­AƒvƒƒWƒFƒNƒg’PˆÊ‚Å‚È‚­Aƒtƒ@ƒCƒ‹’PˆÊ‚ÅƒRƒs[‚µ‚Ä‚Á‚Ä‚¢‚¯‚é‚æ‚¤‚É‚µ‚½‚¢B
+ãªã‚‹ã¹ãã€ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆå˜ä½ã§ãªãã€ãƒ•ã‚¡ã‚¤ãƒ«å˜ä½ã§ã‚³ãƒ”ãƒ¼ã—ã¦æŒã£ã¦ã„ã‘ã‚‹ã‚ˆã†ã«ã—ãŸã„ã€‚
 ## Licence: NYSL
 http://www.kmonos.net/nysl/
 
-A. –{ƒ\ƒtƒgƒEƒFƒA‚Í Everyone'sWare ‚Å‚·B‚±‚Ìƒ\ƒtƒg‚ğè‚É‚µ‚½ˆêlˆêl‚ªA
-   ‚²©•ª‚Ìì‚Á‚½‚à‚Ì‚ğˆµ‚¤‚Ì‚Æ“¯‚¶‚æ‚¤‚ÉA©—R‚É—˜—p‚·‚é‚±‚Æ‚ªo—ˆ‚Ü‚·B
+A. æœ¬ã‚½ãƒ•ãƒˆã‚¦ã‚§ã‚¢ã¯ Everyone'sWare ã§ã™ã€‚ã“ã®ã‚½ãƒ•ãƒˆã‚’æ‰‹ã«ã—ãŸä¸€äººä¸€äººãŒã€
+   ã”è‡ªåˆ†ã®ä½œã£ãŸã‚‚ã®ã‚’æ‰±ã†ã®ã¨åŒã˜ã‚ˆã†ã«ã€è‡ªç”±ã«åˆ©ç”¨ã™ã‚‹ã“ã¨ãŒå‡ºæ¥ã¾ã™ã€‚
 
-@A-1. ƒtƒŠ[ƒEƒFƒA‚Å‚·BìÒ‚©‚ç‚Íg—p—¿“™‚ğ—v‹‚µ‚Ü‚¹‚ñB
+ã€€A-1. ãƒ•ãƒªãƒ¼ã‚¦ã‚§ã‚¢ã§ã™ã€‚ä½œè€…ã‹ã‚‰ã¯ä½¿ç”¨æ–™ç­‰ã‚’è¦æ±‚ã—ã¾ã›ã‚“ã€‚
 
-@A-2. —L—¿–³—¿‚â”}‘Ì‚Ì”@‰½‚ğ–â‚í‚¸A©—R‚É“]ÚEÄ”z•z‚Å‚«‚Ü‚·B
+ã€€A-2. æœ‰æ–™ç„¡æ–™ã‚„åª’ä½“ã®å¦‚ä½•ã‚’å•ã‚ãšã€è‡ªç”±ã«è»¢è¼‰ãƒ»å†é…å¸ƒã§ãã¾ã™ã€‚
 
-@A-3. ‚¢‚©‚È‚éí—Ş‚Ì ‰ü•ÏE‘¼ƒvƒƒOƒ‰ƒ€‚Å‚Ì—˜—p ‚ğs‚Á‚Ä‚à\‚¢‚Ü‚¹‚ñB
+ã€€A-3. ã„ã‹ãªã‚‹ç¨®é¡ã® æ”¹å¤‰ãƒ»ä»–ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã§ã®åˆ©ç”¨ ã‚’è¡Œã£ã¦ã‚‚æ§‹ã„ã¾ã›ã‚“ã€‚
 
-@A-4. •ÏX‚µ‚½‚à‚Ì‚â•”•ª“I‚Ég—p‚µ‚½‚à‚Ì‚ÍA‚ ‚È‚½‚Ì‚à‚Ì‚É‚È‚è‚Ü‚·B
-       ŒöŠJ‚·‚éê‡‚ÍA‚ ‚È‚½‚Ì–¼‘O‚Ì‰º‚Ås‚Á‚Ä‰º‚³‚¢B
+ã€€A-4. å¤‰æ›´ã—ãŸã‚‚ã®ã‚„éƒ¨åˆ†çš„ã«ä½¿ç”¨ã—ãŸã‚‚ã®ã¯ã€ã‚ãªãŸã®ã‚‚ã®ã«ãªã‚Šã¾ã™ã€‚
+       å…¬é–‹ã™ã‚‹å ´åˆã¯ã€ã‚ãªãŸã®åå‰ã®ä¸‹ã§è¡Œã£ã¦ä¸‹ã•ã„ã€‚
 
-B. ‚±‚Ìƒ\ƒtƒg‚ğ—˜—p‚·‚é‚±‚Æ‚É‚æ‚Á‚Ä¶‚¶‚½‘¹ŠQ“™‚É‚Â‚¢‚ÄAìÒ‚Í
-   Ó”C‚ğ•‰‚í‚È‚¢‚à‚Ì‚Æ‚µ‚Ü‚·BŠe©‚ÌÓ”C‚É‚¨‚¢‚Ä‚²—˜—p‰º‚³‚¢B
+B. ã“ã®ã‚½ãƒ•ãƒˆã‚’åˆ©ç”¨ã™ã‚‹ã“ã¨ã«ã‚ˆã£ã¦ç”Ÿã˜ãŸæå®³ç­‰ã«ã¤ã„ã¦ã€ä½œè€…ã¯
+   è²¬ä»»ã‚’è² ã‚ãªã„ã‚‚ã®ã¨ã—ã¾ã™ã€‚å„è‡ªã®è²¬ä»»ã«ãŠã„ã¦ã”åˆ©ç”¨ä¸‹ã•ã„ã€‚
 
-C. ’˜ìÒlŠiŒ ‚Í ttsuki ‚É‹A‘®‚µ‚Ü‚·B’˜ìŒ ‚Í•úŠü‚µ‚Ü‚·B
+C. è‘—ä½œè€…äººæ ¼æ¨©ã¯ ttsuki ã«å¸°å±ã—ã¾ã™ã€‚è‘—ä½œæ¨©ã¯æ”¾æ£„ã—ã¾ã™ã€‚
 
-D. ˆÈã‚Ì‚R€‚ÍAƒ\[ƒXEÀsƒoƒCƒiƒŠ‚Ì‘o•û‚É“K—p‚³‚ê‚Ü‚·B
+D. ä»¥ä¸Šã®ï¼“é …ã¯ã€ã‚½ãƒ¼ã‚¹ãƒ»å®Ÿè¡Œãƒã‚¤ãƒŠãƒªã®åŒæ–¹ã«é©ç”¨ã•ã‚Œã¾ã™ã€‚
 
 
-## ¡‚Å‚«‚é‚±‚Æ
+## ä»Šã§ãã‚‹ã“ã¨
 - WinMM.dll P/Invoke [View Directory](https://github.com/ttsuki/ttsuki/tree/master/WinMM)
- - MidiOut / MidiIn Wrapping Class Library. MidiOut‚Æ‚©MidiIn‚ğŠÈ’P‚Ég‚¦‚é‚æ‚¤‚É‚µ‚½B [View Source](https://github.com/ttsuki/ttsuki/blob/master/WinMM/MidiIO.cs)
- - WaveOut / WaveIn Wrapping Class Library. WaveOut‚Æ‚©WaveIn‚ğŠÈ’P‚Ég‚¦‚é‚æ‚¤‚É‚µ‚½B [View Source](https://github.com/ttsuki/ttsuki/blob/master/WinMM/WaveIO.cs)
- - WaveDSP - Volume. Gain(dB) ‚ğw’è‚µ‚Ä Waveform ‚Ì ‰¹—Ê‚ğ•Ï‚¦‚éB[View Source](https://github.com/ttsuki/ttsuki/blob/master/WinMM/WaveDSP.cs)
- - ACM MP3 Decoder Class. Windows•W€‚ÌAudio Codec Manager ‚ğg‚Á‚ÄŠÈ’P‚ÉMP3ƒfƒR[ƒh‚Å‚«‚éB[View Source](https://github.com/ttsuki/ttsuki/blob/master/WinMM/AcmMp3Decoder.cs)
+ - MidiOut / MidiIn Wrapping Class Library. MidiOutã¨ã‹MidiInã‚’ç°¡å˜ã«ä½¿ãˆã‚‹ã‚ˆã†ã«ã—ãŸã€‚ [View Source](https://github.com/ttsuki/ttsuki/blob/master/WinMM/MidiIO.cs)
+ - WaveOut / WaveIn Wrapping Class Library. WaveOutã¨ã‹WaveInã‚’ç°¡å˜ã«ä½¿ãˆã‚‹ã‚ˆã†ã«ã—ãŸã€‚ [View Source](https://github.com/ttsuki/ttsuki/blob/master/WinMM/WaveIO.cs)
+ - WaveDSP - Volume. Gain(dB) ã‚’æŒ‡å®šã—ã¦ Waveform ã® éŸ³é‡ã‚’å¤‰ãˆã‚‹ã€‚[View Source](https://github.com/ttsuki/ttsuki/blob/master/WinMM/WaveDSP.cs)
+ - ACM MP3 Decoder Class. Windowsæ¨™æº–ã®Audio Codec Manager ã‚’ä½¿ã£ã¦ç°¡å˜ã«MP3ãƒ‡ã‚³ãƒ¼ãƒ‰ã§ãã‚‹ã€‚[View Source](https://github.com/ttsuki/ttsuki/blob/master/WinMM/AcmMp3Decoder.cs)
 - Windows Messaging [View Directory](https://github.com/ttsuki/ttsuki/tree/master/Messaging)
  - Windows Messaging Window for Multimedia callback. [View Source](https://github.com/ttsuki/ttsuki/blob/master/Messaging/MessageWindow.cs)
  - Windows Messaging Thread for Multimedia callback. [View Source](https://github.com/ttsuki/ttsuki/blob/master/Messaging/MessageThread.cs)
 - Net [View Directory](https://github.com/ttsuki/ttsuki/tree/master/Net)
  - Wake On Lan. [View Source](https://github.com/ttsuki/ttsuki/blob/master/Net/WakeOnLan.cs)
-- Keyboard Hook - “Á’è‚ÌƒL[“ü—Í‚ğ‘¼‚ÌƒL[“ü—Í‚É•ÏX‚µ‚½‚èB[View Source](https://github.com/ttsuki/ttsuki/blob/master/KeyboardHook.cs)
+- Keyboard Hook - ç‰¹å®šã®ã‚­ãƒ¼å…¥åŠ›ã‚’ä»–ã®ã‚­ãƒ¼å…¥åŠ›ã«å¤‰æ›´ã—ãŸã‚Šã€‚[View Source](https://github.com/ttsuki/ttsuki/blob/master/KeyboardHook.cs)
 
-##‚Å‚«‚é—\’è‚Ì‚±‚Æ
+##ã§ãã‚‹äºˆå®šã®ã“ã¨
 
-- –¢’è
+- æœªå®š
