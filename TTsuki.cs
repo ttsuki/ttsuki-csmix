@@ -5,6 +5,9 @@ using System.Threading;
 using System.Windows.Forms;
 using Tsukikage.WinMM.AcmMP3Decoder;
 using Tsukikage.WinMM.WaveIO;
+using System.IO;
+using Tsukikage.Util;
+using System.Diagnostics;
 
 namespace Tsukikage
 {
@@ -13,7 +16,24 @@ namespace Tsukikage
         static void Main()
         {
             //WaveInToWaveOutSample();
-            Mp3ToWaveOutSample(@"E:\My Documents\20nov.mp3");
+            //Mp3ToWaveOutSample(@"E:\My Documents\20nov.mp3");
+
+            //StableSorter.Benchmark.DoIt();
+
+            VarVarVar();
+        }
+
+        public static void VarVarVar()
+        {
+            Var a = "1";
+            Var b = 1;
+            Var c = "a";
+            Var list = new Var[] { 1, 2, 3 };
+            if (a + b) // "1" + 1 = "11". "11" is true like JavaScript.
+            {
+                long x = list ? 1 : 2; // list is VarList. VarList is true like JavaScript. 
+                Console.WriteLine(x.ToString());
+            }
         }
 
         public static void WaveInToWaveOutSample()

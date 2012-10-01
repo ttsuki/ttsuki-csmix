@@ -43,6 +43,7 @@ C. Copyrighted to ttsuki.
 D. Above three clauses are applied both to source and binary form of this software.  
 
 ## 今できること
+
 - WinMM.dll P/Invoke [View Directory](https://github.com/ttsuki/ttsuki/tree/master/WinMM)
  - MidiOut / MidiIn Wrapping Class Library. MidiOutとかMidiInを簡単に使えるようにした。 [View Source](https://github.com/ttsuki/ttsuki/blob/master/WinMM/MidiIO.cs)
  - WaveOut / WaveIn Wrapping Class Library. WaveOutとかWaveInを簡単に使えるようにした。 [View Source](https://github.com/ttsuki/ttsuki/blob/master/WinMM/WaveIO.cs)
@@ -56,6 +57,16 @@ D. Above three clauses are applied both to source and binary form of this softwa
 - Third Party DLL PInvoke Classes. [View Directory](https://github.com/ttsuki/ttsuki/tree/master/DllPInvoke)
  - mp3infp from C# - MP3 WAV AVI VQF WMA WMV OGG APE MP4 tag を扱える mp3infp を C# から。[View Source](https://github.com/ttsuki/ttsuki/blob/master/DllPInvoke/mp3infp.cs)
  - lame_enc from C# - Lame_enc.dll を C# から。[View Source](https://github.com/ttsuki/ttsuki/blob/master/DllPInvoke/LameMp3Encoder.cs)
+- Util - not categorized yet. 未分類 [View Directory](https://github.com/ttsuki/ttsuki/tree/master/Util)
+ - BinaryUtil - はっかーのたのしみ Hacker's delight. [View Source](https://github.com/ttsuki/ttsuki/blob/master/Util/BinaryUtil.cs)
+ - CRC 32 - CRC 32を計算する。 [View Source](https://github.com/ttsuki/ttsuki/blob/master/Util/Crc32.cs)
+ - C# CodeDom Compiler Wrapper - C#コンパイラをもうちょっと気軽に。 [View Source](https://github.com/ttsuki/ttsuki/blob/master/Util/CSharpCompiler.cs)
+ - Reflection Utility - 型からフィールドの値を得たりメソッドを得たり。C#コンパイラのお供に。 [View Source](https://github.com/ttsuki/ttsuki/blob/master/Util/ReflectionUtil.cs)
+ - RingIndexer - i++だけでloopする配列wrapper。アニメーションとか用。 [View Source](https://github.com/ttsuki/ttsuki/blob/master/Util/RingIndexer.cs)
+ - Stable Sorter - Merge sortによるそこそこ高速な安定ソートを提供。 [View Source](https://github.com/ttsuki/ttsuki/blob/master/Util/StableSorter.cs)
+ - Text File Reader with Guessing Japanese Kanji-code - 文字コード判別します。 [View Source](https://github.com/ttsuki/ttsuki/blob/master/Util/TextFile.cs)
+ - Var - 似非バリアント型。主にJson読み書き用。[View Source](https://github.com/ttsuki/ttsuki/blob/master/Util/Var.cs)
+ - EntryAssemblyInfo - プロセスの起動に使われたEXEのAssemblyInfoを取ってくる。[View Source](https://github.com/ttsuki/ttsuki/blob/master/Util/EntryAssembly.cs)
 - Keyboard Hook - 特定のキー入力を他のキー入力に変更したり。[View Source](https://github.com/ttsuki/ttsuki/blob/master/KeyboardHook.cs)
 
 ##できる予定のこと
