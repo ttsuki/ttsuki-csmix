@@ -67,7 +67,10 @@ D. Above three clauses are applied both to source and binary form of this softwa
  - Text File Reader with Guessing Japanese Kanji-code - 文字コード判別します。 [View Source](https://github.com/ttsuki/ttsuki/blob/master/Util/TextFile.cs)
  - Var - 似非バリアント型。主にJson読み書き用。[View Source](https://github.com/ttsuki/ttsuki/blob/master/Util/Var.cs)
  - EntryAssemblyInfo - プロセスの起動に使われたEXEのAssemblyInfoを取ってくる。[View Source](https://github.com/ttsuki/ttsuki/blob/master/Util/EntryAssembly.cs)
-- Keyboard Hook - 特定のキー入力を他のキー入力に変更したり。[View Source](https://github.com/ttsuki/ttsuki/blob/master/KeyboardHook.cs)
+- Windows Util [View Directory](https://github.com/ttsuki/ttsuki/tree/master/WindowsUtil)
+ - Keyboard Hook - 特定のキー入力を他のキー入力に変更したり。[View Source](https://github.com/ttsuki/ttsuki/blob/master/WindowsUtil/KeyboardHook.cs)
+ - FontFileLoader - アプリ独自のTTFファイルとかを読む。 [View Source](https://github.com/ttsuki/ttsuki/blob/master/WindowsUtil/FontFileLoader.cs)
+ - FontBitmapLoder - GetGlyphOutlineを使って、フォントのビットマップを得る。[View Source](https://github.com/ttsuki/ttsuki/blob/master/WindowsUtil/FontBitmapLoder.cs)
 
 ##できる予定のこと
 

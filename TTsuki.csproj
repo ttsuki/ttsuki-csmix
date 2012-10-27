@@ -38,6 +38,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -45,7 +46,6 @@
     <Compile Include="DllPInvoke\LameMp3Encoder.cs" />
     <Compile Include="DllPInvoke\mp3infp.cs" />
     <Compile Include="DllPInvoke\Test.cs" />
-    <Compile Include="KeyboardHook.cs" />
     <Compile Include="Messaging\MessageThread.cs" />
     <Compile Include="Messaging\MessageWindow.cs" />
     <Compile Include="Util\BinaryUtil.cs" />
@@ -60,6 +60,9 @@
     <Compile Include="Util\StableSorter.cs" />
     <Compile Include="Util\TextFile.cs" />
     <Compile Include="Util\Var.cs" />
+    <Compile Include="WindowsUtil\FontBitmapLoder.cs" />
+    <Compile Include="WindowsUtil\FontFileLoader.cs" />
+    <Compile Include="WindowsUtil\KeyboardHook.cs" />
     <Compile Include="WinMM\AcmMp3Decoder.cs">
       <SubType>Code</SubType>
     </Compile>

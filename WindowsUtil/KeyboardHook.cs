@@ -84,7 +84,6 @@ namespace Tsukikage.WindowsUtil
             Dispose();
         }
 
-
         #region omake
         public static void GenerateKeyboardEvent(Keys keyCode, bool keyDown)
         {

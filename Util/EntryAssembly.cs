@@ -9,12 +9,12 @@ namespace Tsukikage.Util
     /// プロセスの起動に使われたEXEファイルの情報を返します。
     /// Entry assembly information.
     /// </summary>
-    public static class EntryAssemblyInfo
+    public static class EntryAssemblyInformation
     {
         /// <summary>
         /// 起動に使われたEXEファイルのアセンブリを取得します。
         /// </summary>
-        public static Assembly Assembly { get; private set; }
+        public static Assembly EntryAssembly { get; private set; }
 
         /// <summary>
         /// EXEファイルのassembly:Title属性を取得します。
@@ -46,23 +46,23 @@ namespace Tsukikage.Util
         /// </summary>
         public static string StartupPath { get; private set; }
 
-        static EntryAssembly()
+        static EntryAssemblyInformation()
         {
-            Assembly = Assembly.GetEntryAssembly();
+            EntryAssembly = Assembly.GetEntryAssembly();
             
-            foreach (object obj in Assembly.GetCustomAttributes(typeof(AssemblyTitleAttribute), true))
+            foreach (object obj in EntryAssembly.GetCustomAttributes(typeof(AssemblyTitleAttribute), true))
                 Title = (string)typeof(AssemblyTitleAttribute).GetProperty("Title").GetValue(obj, null);
 
-            foreach (object obj in Assembly.GetCustomAttributes(typeof(AssemblyDescriptionAttribute), true))
+            foreach (object obj in EntryAssembly.GetCustomAttributes(typeof(AssemblyDescriptionAttribute), true))
                 Description = ((AssemblyDescriptionAttribute)obj).Description;
 
-            foreach (object obj in Assembly.GetCustomAttributes(typeof(AssemblyCompanyAttribute), true))
+            foreach (object obj in EntryAssembly.GetCustomAttributes(typeof(AssemblyCompanyAttribute), true))
                 Company = ((AssemblyCompanyAttribute)obj).Company;
 
-            foreach (object obj in Assembly.GetCustomAttributes(typeof(AssemblyProductAttribute), true))
+            foreach (object obj in EntryAssembly.GetCustomAttributes(typeof(AssemblyProductAttribute), true))
                 Product = ((AssemblyProductAttribute)obj).Product;
 
-            foreach (object obj in Assembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), true))
+            foreach (object obj in EntryAssembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), true))
                 Copyright = ((AssemblyCopyrightAttribute)obj).Copyright;
 
             StartupPath = System.Windows.Forms.Application.StartupPath;
