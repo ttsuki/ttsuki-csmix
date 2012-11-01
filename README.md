@@ -54,6 +54,7 @@ D. Above three clauses are applied both to source and binary form of this softwa
  - Windows Messaging Thread for Multimedia callback. [View Source](https://github.com/ttsuki/ttsuki/blob/master/Messaging/MessageThread.cs)
 - Net [View Directory](https://github.com/ttsuki/ttsuki/tree/master/Net)
  - Wake On Lan. [View Source](https://github.com/ttsuki/ttsuki/blob/master/Net/WakeOnLan.cs)
+ - UPnP PortMapping. いわゆる「ルータのポート穴あけ」をしてくれる。[View Source](https://github.com/ttsuki/ttsuki/blob/master/Net/UPnPWanService.cs)
 - Third Party DLL PInvoke Classes. [View Directory](https://github.com/ttsuki/ttsuki/tree/master/DllPInvoke)
  - mp3infp from C# - MP3 WAV AVI VQF WMA WMV OGG APE MP4 tag を扱える mp3infp を C# から。[View Source](https://github.com/ttsuki/ttsuki/blob/master/DllPInvoke/mp3infp.cs)
  - lame_enc from C# - Lame_enc.dll を C# から。[View Source](https://github.com/ttsuki/ttsuki/blob/master/DllPInvoke/LameMp3Encoder.cs)

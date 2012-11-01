@@ -48,6 +48,7 @@
     <Compile Include="DllPInvoke\Test.cs" />
     <Compile Include="Messaging\MessageThread.cs" />
     <Compile Include="Messaging\MessageWindow.cs" />
+    <Compile Include="Net\UPnPWanService.cs" />
     <Compile Include="Util\BinaryUtil.cs" />
     <Compile Include="Util\Crc32.cs" />
     <Compile Include="Net\WakeOnLan.cs" />
@@ -76,7 +77,20 @@
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <COMReference Include="UPNPLib">
+      <Guid>{DB3442A7-A2E9-4A59-9CB5-F5C1A5D901E5}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

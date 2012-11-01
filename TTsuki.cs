@@ -19,8 +19,7 @@ namespace Tsukikage
             //Mp3ToWaveOutSample(@"E:\My Documents\20nov.mp3");
 
             //StableSorter.Benchmark.DoIt();
-
-            VarVarVar();
+            //Tsukikage.Net.UPnPWanService.Test();
         }
 
         public static void VarVarVar()
