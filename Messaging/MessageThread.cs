@@ -36,6 +36,28 @@ namespace Tsukikage.Windows.Messaging
         /// 新しいメッセージループスレッドを作る
         /// </summary>
         public MessageThread()
+            : this(false)
+        {
+
+        }
+
+        /// <summary>
+        /// Create new message loop thread.
+        /// 新しいメッセージループスレッドを作る
+        /// </summary>
+        /// <param name="isBackground">バックグラウンドスレッドにする場合はtrue</param>
+        public MessageThread(bool isBackground)
+            : this(isBackground, ThreadPriority.Normal)
+        {
+        }
+
+        /// <summary>
+        /// Create new message loop thread.
+        /// 新しいメッセージループスレッドを作る
+        /// </summary>
+        /// <param name="isBackground">バックグラウンドスレッドにする場合はtrue</param>
+        /// <param name="threadPriority">スレッドの実行優先度</param>
+        public MessageThread(bool isBackground, ThreadPriority threadPriority)
         {
             MessageHandlers = new Dictionary<int, CallbackDelegate>();
             using (ManualResetEvent initialized = new ManualResetEvent(false))
@@ -46,11 +68,25 @@ namespace Tsukikage.Windows.Messaging
 #pragma warning disable
                     Win32ThreadID = AppDomain.GetCurrentThreadId();
 #pragma warning enable
+                    Application.DoEvents(); // メッセージループを作る
                     initialized.Set();
                     Application.Run();
                 });
+                thread.IsBackground = isBackground;
+                thread.Priority = threadPriority;
                 thread.Start();
                 initialized.WaitOne();
+            }
+        }
+        int nextMessage = 0;
+        public void Invoke(CallbackDelegate action)
+        {
+            using (ManualResetEvent ok = new ManualResetEvent(false))
+            {
+                int msg = Interlocked.Increment(ref nextMessage) % 0x1000 + 0x9000;
+                MessageHandlers[msg] = action + delegate { ok.Set(); };
+                PostMessage(msg, IntPtr.Zero, IntPtr.Zero);
+                ok.WaitOne();
             }
         }
 
