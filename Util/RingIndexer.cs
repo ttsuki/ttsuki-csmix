@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Tsukikage.GameSDK.Util
+namespace Tsukikage.Util
 {
     /// <summary>
     /// リングインデクサ。

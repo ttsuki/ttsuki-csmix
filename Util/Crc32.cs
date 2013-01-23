@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Tsukikage.GameSDK.Util
+namespace Tsukikage.Util
 {
     /// <summary>
     /// CRC32算出機能を提供します

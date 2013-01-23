@@ -6,7 +6,7 @@ using Microsoft.CSharp;
 using System.CodeDom.Compiler;
 using System.IO;
 
-namespace Tsukikage.GameSDK.Util
+namespace Tsukikage.Util
 {
     /// <summary>
     /// C# Compiler.
