@@ -1,9 +1,7 @@
-
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Runtime.InteropServices;
-using System.Collections;
+using System.Threading;
 using System.Windows.Forms;
 using Tsukikage.Windows.Messaging;
 
@@ -23,7 +21,7 @@ namespace Tsukikage.WinMM.WaveIO
 
         public const int WaveMapper = -1;
         public IntPtr Handle { get { return deviceHandle; } }
-        
+
         /// <summary>
         /// Not played yet (contains playing data).
         /// 再生が終わってないデータの量(Write単位)
@@ -67,8 +65,8 @@ namespace Tsukikage.WinMM.WaveIO
                 Win32.WaveHeader header = Win32.WaveHeader.FromIntPtr(m.LParam);
                 WaveBuffer buf = WaveBuffer.FromWaveHeader(header);
                 Win32.waveOutUnprepareHeader(deviceHandle, buf.pHeader, Win32.WaveHeader.SizeOfWaveHeader);
-                Interlocked.Add(ref enqueuedBufferSize, -buf.Data.Length);
                 buf.Dispose();
+                Interlocked.Add(ref enqueuedBufferSize, -buf.BufferLength);
                 if (OnDone != null)
                     OnDone();
             };
@@ -88,11 +86,49 @@ namespace Tsukikage.WinMM.WaveIO
         public void Write(byte[] waveform)
         {
             EnsureOpened();
-            WaveBuffer buf = new WaveBuffer((uint)waveform.Length);
-            Array.Copy(waveform, buf.Data, waveform.Length);
-            Interlocked.Add(ref enqueuedBufferSize, waveform.Length);
-            Win32.waveOutPrepareHeader(deviceHandle, buf.pHeader, Win32.WaveHeader.SizeOfWaveHeader);
-            Win32.waveOutWrite(deviceHandle, buf.pHeader, Win32.WaveHeader.SizeOfWaveHeader);
+            Write(waveform, 0, waveform.Length);
+        }
+
+        /// <summary>
+        /// Write data to WaveOut.
+        /// 音を出す
+        /// </summary>
+        /// <param name="waveform">音</param>
+        /// <param name="offset">読み出す位置</param>
+        /// <param name="count">読み出すバイト数</param>
+        public void Write(byte[] waveform, int offset, int count)
+        {
+            EnsureOpened();
+            WaveBuffer buf = new WaveBuffer(count);
+            Array.Copy(waveform, offset, buf.Data, 0, buf.BufferLength);
+            Write(buf);
+        }
+
+        /// <summary>
+        /// Write data to WaveOut.
+        /// 音を出す
+        /// </summary>
+        /// <param name="src">音</param>
+        /// <param name="length">バイト数</param>
+        public void Write(IntPtr src, int length)
+        {
+            EnsureOpened();
+            WaveBuffer buf = new WaveBuffer(length);
+            Marshal.Copy(src, buf.Data, 0, buf.BufferLength);
+            Write(buf);
+        }
+
+        /// <summary>
+        /// Write data to WaveOut.
+        /// 音を出す
+        /// </summary>
+        /// <param name="buffer">音が入ったバッファ</param>
+        private void Write(WaveBuffer buffer)
+        {
+            EnsureOpened();
+            Interlocked.Add(ref enqueuedBufferSize, buffer.BufferLength);
+            Win32.waveOutPrepareHeader(deviceHandle, buffer.pHeader, Win32.WaveHeader.SizeOfWaveHeader);
+            Win32.waveOutWrite(deviceHandle, buffer.pHeader, Win32.WaveHeader.SizeOfWaveHeader);
         }
 
         /// <summary>
@@ -170,7 +206,7 @@ namespace Tsukikage.WinMM.WaveIO
         /// イベントは別のスレッドから呼ばれることがあります。
         /// </remarks>
         public event WaveInDataHandler OnData;
-       
+
         int enqueuedBufferCount = 0;
         volatile bool recording = false;
 
@@ -191,12 +227,15 @@ namespace Tsukikage.WinMM.WaveIO
             {
                 Win32.WaveHeader header = Win32.WaveHeader.FromIntPtr(m.LParam);
                 WaveBuffer buf = WaveBuffer.FromWaveHeader(header);
-
                 int bytesRecorded = (int)header.dwBytesRecorded;
                 if (OnData != null && bytesRecorded != 0)
                 {
-                    byte[] data = new byte[bytesRecorded];
-                    Array.Copy(buf.Data, data, bytesRecorded);
+                    byte[] data = buf.Data;
+                    if (bytesRecorded != buf.Data.Length)
+                    {
+                        data = new byte[bytesRecorded];
+                        Array.Copy(buf.Data, data, bytesRecorded);
+                    }
                     OnData(data);
                 }
 
@@ -250,7 +289,7 @@ namespace Tsukikage.WinMM.WaveIO
 
             for (int i = 0; i < bufferCount; i++)
             {
-                WaveBuffer buf = new WaveBuffer((uint)bufferSize);
+                WaveBuffer buf = new WaveBuffer(bufferSize);
                 Win32.waveInPrepareHeader(deviceHandle, buf.pHeader, Win32.WaveHeader.SizeOfWaveHeader);
                 Win32.waveInAddBuffer(deviceHandle, buf.pHeader, Win32.WaveHeader.SizeOfWaveHeader);
                 Interlocked.Add(ref enqueuedBufferCount, 1);
@@ -320,24 +359,47 @@ namespace Tsukikage.WinMM.WaveIO
     [System.Security.SuppressUnmanagedCodeSecurity]
     class WaveBuffer : IDisposable
     {
-        public IntPtr pHeader { get; private set; }
-        public byte[] Data { get; private set; }
         GCHandle dataHandle;
         GCHandle bufferHandle;
+        int length;
 
-        public WaveBuffer(uint dwSize)
+        public IntPtr pHeader { get; private set; }
+        public byte[] Data { get; private set; }
+
+        public int BufferLength
         {
+            get { return length; }
+            set { SetLength(value); }
+        }
+
+        public WaveBuffer(int dwSize)
+        {
+            length = dwSize;
             Data = new byte[dwSize];
             dataHandle = GCHandle.Alloc(Data, GCHandleType.Pinned);
             bufferHandle = GCHandle.Alloc(this);
 
             Win32.WaveHeader header = new Win32.WaveHeader();
             header.lpData = dataHandle.AddrOfPinnedObject();
-            header.dwBufferLength = (uint)Data.Length;
+            header.dwBufferLength = (uint)length;
             header.dwUser = GCHandle.ToIntPtr(bufferHandle);
 
             pHeader = Marshal.AllocHGlobal(Win32.WaveHeader.SizeOfWaveHeader);
             Marshal.StructureToPtr(header, pHeader, true);
+        }
+
+        public void SetLength(int newLength)
+        {
+            if (newLength < 0 || newLength > Data.Length)
+                throw new ArgumentOutOfRangeException("newLength");
+
+            if (newLength != length)
+            {
+                length = newLength;
+                Win32.WaveHeader header = (Win32.WaveHeader)Marshal.PtrToStructure(pHeader, typeof(Win32.WaveHeader));
+                header.dwBufferLength = (uint)length;
+                Marshal.StructureToPtr(header, pHeader, true);
+            }
         }
 
         public static WaveBuffer FromWaveHeader(Win32.WaveHeader header)

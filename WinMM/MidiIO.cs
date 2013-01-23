@@ -51,7 +51,7 @@ namespace Tsukikage.WinMM.MidiIO
                 MidiBuffer buf = MidiBuffer.FromMidiHeader(hdr);
                 Win32.midiOutUnprepareHeader(deviceHandle, buf.pHeader, Win32.MidiHeader.SizeOfMidiHeader);
                 buf.Dispose();
-                Interlocked.Add(ref enqueuedBufferSize, -buf.Data.Length);
+                Interlocked.Add(ref enqueuedBufferSize, -buf.BufferLength);
                 if (OnDone != null) 
                     OnDone();
             };
@@ -89,10 +89,51 @@ namespace Tsukikage.WinMM.MidiIO
         public void Write(params byte[] data)
         {
             EnsureOpened();
-            MidiBuffer buf = new MidiBuffer(data.Length);
-            Array.Copy(data, buf.Data, data.Length);
-            Win32.midiOutPrepareHeader(deviceHandle, buf.pHeader, Win32.MidiHeader.SizeOfMidiHeader);
-            Win32.midiOutLongMsg(deviceHandle, buf.pHeader, Win32.MidiHeader.SizeOfMidiHeader);
+            Write(data, 0, data.Length);
+        }
+
+        /// <summary>
+        /// Send long midi message.
+        /// 長いmidiデータを送ります
+        /// </summary>
+        /// <param name="data">データ</param>
+        /// <param name="offset">読み出す位置</param>
+        /// <param name="count">読み出すバイト数</param>
+        public void Write(byte[] data, int offset, int count)
+        {
+            EnsureOpened();
+            MidiBuffer buf = new MidiBuffer(count);
+            buf.BufferLength = count;
+            Array.Copy(data, offset, buf.Data, 0, buf.BufferLength);
+            Write(buf);
+        }
+
+        /// <summary>
+        /// Send long midi message.
+        /// 長いmidiデータを送ります
+        /// </summary>
+        /// <param name="src">データ</param>
+        /// <param name="length">読み出すバイト数</param>
+        public void Write(IntPtr src, int length)
+        {
+            EnsureOpened();
+            MidiBuffer buf = new MidiBuffer(length);
+            buf.BufferLength = length;
+            Marshal.Copy(src, buf.Data, 0, buf.BufferLength);
+            Write(buf);
+        }
+
+        /// <summary>
+        /// Send long midi message.
+        /// 長いmidiデータを送ります
+        /// </summary>
+        /// <param name="buffer">メッセージが入ったバッファ</param>
+        private void Write(MidiBuffer buffer)
+        {
+            EnsureOpened();
+            Interlocked.Add(ref enqueuedBufferSize, buffer.BufferLength);
+            Win32.midiOutPrepareHeader(deviceHandle, buffer.pHeader, Win32.MidiHeader.SizeOfMidiHeader);
+            Win32.midiOutLongMsg(deviceHandle, buffer.pHeader, Win32.MidiHeader.SizeOfMidiHeader);
         }
 
         /// <summary>
@@ -202,12 +243,17 @@ namespace Tsukikage.WinMM.MidiIO
             messageProc = new MessageThread();
             messageProc.MessageHandlers[Win32.MM_MIM_LONGDATA] = delegate(Message m)
             {
-                Win32.MidiHeader hdr = Win32.MidiHeader.FromIntPtr(m.LParam);
-                MidiBuffer buf = MidiBuffer.FromMidiHeader(hdr);
-                if (OnLongMsg != null && hdr.dwBytesRecorded != 0)
+                Win32.MidiHeader header = Win32.MidiHeader.FromIntPtr(m.LParam);
+                MidiBuffer buf = MidiBuffer.FromMidiHeader(header);
+                int bytesRecorded = (int)header.dwBytesRecorded;
+                if (OnLongMsg != null && bytesRecorded != 0)
                 {
-                    byte[] data = new byte[hdr.dwBytesRecorded];
-                    Array.Copy(buf.Data, data, hdr.dwBytesRecorded);
+                    byte[] data = buf.Data;
+                    if (bytesRecorded != buf.Data.Length)
+                    {
+                        data = new byte[bytesRecorded];
+                        Array.Copy(buf.Data, data, bytesRecorded);
+                    }
                     OnLongMsg(data);
                 }
 
@@ -339,24 +385,47 @@ namespace Tsukikage.WinMM.MidiIO
     [System.Security.SuppressUnmanagedCodeSecurity]
     class MidiBuffer : IDisposable
     {
-        public IntPtr pHeader { get; private set; }
-        public byte[] Data { get; private set; }
         GCHandle dataHandle;
         GCHandle bufferHandle;
+        int length;
+
+        public IntPtr pHeader { get; private set; }
+        public byte[] Data { get; private set; }
+        
+        public int BufferLength
+        {
+            get { return length; }
+            set { SetLength(value); }
+        }
 
         public MidiBuffer(int dwSize)
         {
+            length = dwSize;
             Data = new byte[dwSize];
             dataHandle = GCHandle.Alloc(Data, GCHandleType.Pinned);
-            bufferHandle = GCHandle.Alloc(this);
-
+            bufferHandle = GCHandle.Alloc(this); 
+            
             Win32.MidiHeader header = new Win32.MidiHeader();
             header.lpData = dataHandle.AddrOfPinnedObject();
-            header.dwBufferLength = (uint)Data.Length;
+            header.dwBufferLength = (uint)length;
             header.dwUser = GCHandle.ToIntPtr(bufferHandle);
 
             pHeader = Marshal.AllocHGlobal(Win32.MidiHeader.SizeOfMidiHeader);
             Marshal.StructureToPtr(header, pHeader, true);
+        }
+
+        public void SetLength(int newLength)
+        {
+            if (newLength < 0 || newLength > Data.Length)
+                throw new ArgumentOutOfRangeException("newLength");
+
+            if (newLength != length)
+            {
+                length = newLength;
+                Win32.MidiHeader header = (Win32.MidiHeader)Marshal.PtrToStructure(pHeader, typeof(Win32.MidiHeader));
+                header.dwBufferLength = (uint)length;
+                Marshal.StructureToPtr(header, pHeader, true);
+            }
         }
 
         public static MidiBuffer FromMidiHeader(Win32.MidiHeader header)
