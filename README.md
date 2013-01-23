@@ -36,6 +36,7 @@ C#でWindowsプログラムを書くときに、ちょっと便利にするラ�
  - Keyboard Hook - 特定のキー入力を他のキー入力に変更したり。[View Source](https://github.com/ttsuki/ttsuki/blob/master/WindowsUtil/KeyboardHook.cs)
  - FontFileLoader - アプリ独自のTTFファイルとかを読む。 [View Source](https://github.com/ttsuki/ttsuki/blob/master/WindowsUtil/FontFileLoader.cs)
  - FontBitmapLoder - GetGlyphOutlineを使って、フォントのビットマップを得る。[View Source](https://github.com/ttsuki/ttsuki/blob/master/WindowsUtil/FontBitmapLoder.cs)
+ - DirectShow - SampleGrabberGraphで動画プレーヤーやMovieTextureやら。 [View Directory](https://github.com/ttsuki/ttsuki/tree/master/WindowsUtil/DirectShow)
 
 ##できる予定のこと
 
