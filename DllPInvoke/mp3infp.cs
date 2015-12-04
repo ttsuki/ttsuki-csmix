@@ -341,8 +341,11 @@ namespace Tsukikage.DllPInvoke.MP3Tag
                 foreach (var p in properties)
                 {
                     ValueNameAttribute vna = Attribute.GetCustomAttribute(p, typeof(ValueNameAttribute)) as ValueNameAttribute;
-                    if (vna != null && p.GetSetMethod() != null)
-                        Native.SetValue(vna.ValueName, p.GetValue(tag, null).ToString());
+                    if (vna != null && p.GetSetMethod() != null) {
+                        var val = p.GetValue(tag, null);
+                        if (val != null)
+                            Native.SetValue(vna.ValueName, val.ToString());
+                    }
                 }
 
                 error = Native.Save(tag.Path);
