@@ -1,6 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Reflection;
 
 namespace Tsukikage.Util
@@ -42,6 +39,11 @@ namespace Tsukikage.Util
         public static string Copyright { get; private set; }
 
         /// <summary>
+        /// EXEファイルのassembly: AssemblyVersion属性を取得します。
+        /// </summary>
+        public static string Version { get; private set; }
+
+        /// <summary>
         /// 起動ディレクトリを取得します。
         /// </summary>
         public static string StartupPath { get; private set; }
@@ -49,7 +51,7 @@ namespace Tsukikage.Util
         static EntryAssemblyInformation()
         {
             EntryAssembly = Assembly.GetEntryAssembly();
-            
+
             foreach (object obj in EntryAssembly.GetCustomAttributes(typeof(AssemblyTitleAttribute), true))
                 Title = (string)typeof(AssemblyTitleAttribute).GetProperty("Title").GetValue(obj, null);
 
@@ -65,9 +67,9 @@ namespace Tsukikage.Util
             foreach (object obj in EntryAssembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), true))
                 Copyright = ((AssemblyCopyrightAttribute)obj).Copyright;
 
-            StartupPath = System.Windows.Forms.Application.StartupPath;
+            Version = EntryAssembly.GetName().Version.ToString();
 
+            StartupPath = System.Windows.Forms.Application.StartupPath;
         }
     }
-
 }
