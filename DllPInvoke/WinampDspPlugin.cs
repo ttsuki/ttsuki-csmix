@@ -7,6 +7,147 @@ using System.Runtime.InteropServices;
 
 namespace Tsukikage.DllPInvoke.WinampDspPlugin
 {
+    // Winamp の dsp_*.dll をロードして波形をいじるためのクラスライブラリ
+    //    2016. 6.20 / http://tu3.jp/
+
+#if EXAMPLE_CODE
+    namespace Example
+    {
+        using System.Diagnostics;
+        using System.Runtime.InteropServices;
+        using Tsukikage.Audio;
+        using Tsukikage.WinMM.WaveIO;
+
+        class Test
+        {
+            public static void RunTest(string[] args)
+            {
+                Test_EnumerateInstalledPlugins();
+                Test_PlayWithSATools();
+            }
+
+            /// <summary>
+            /// Test
+            /// </summary>
+            static void Test_EnumerateInstalledPlugins()
+            {
+                //Debug.Listeners.Add(new ConsoleTraceListener());
+
+                // Create ParentWindow
+                IntPtr parentHandle = IntPtr.Zero;
+                /*
+                MessageWindow f = new MessageWindow();
+                f.MessageHandlers.Add(0x400, (ref Message m) => { m.Result = new IntPtr(1); });
+                Application.DoEvents();
+                IntPtr parentHandle = f.Handle;
+                */
+
+                // find all installed plugins.
+                var ProgramFilesPath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+                var dllFiles = Directory.GetFiles(ProgramFilesPath + "/Winamp/Plugins", "dsp_*.dll");
+
+                // foreach plugin dll...
+                foreach (var dllPath in dllFiles)
+                {
+                    Console.WriteLine("Path: " + dllPath);
+
+                    // Since the window f does not provide Winamp APIs,
+                    // passing f.Handle will cause crash in loading dsp_sps.dll.
+                    // dsp_sps requires IPC_GET_API_SERVICE.
+                    DSPPlugin dsp = DSPPluginLoader.LoadDSPPlugin(dllPath, parentHandle);
+
+                    if (dsp == null)
+                    {
+                        Console.WriteLine(" - Error.");
+                        continue;
+                    }
+
+                    Console.WriteLine(" + Plug-in: " + dsp.Description);
+                    Console.WriteLine(" + Header version: " + dsp.DspHeaderVersion);
+
+                    for (int i = 0; i < dsp.Modules.Count; i++)
+                    {
+                        Console.WriteLine(" + Module #" + (i + 1) + ": " + dsp.Modules[i].Description);
+                    }
+
+                    dsp.Release();
+                }
+            }
+
+            /// <summary>
+            /// Test
+            /// </summary>
+            static void Test_PlayWithSATools()
+            {
+                string audioFileName = "./test.ogg";
+                string dspPluginDllName = "dsp_stereo_tool.dll";
+
+                // Load plugin
+                var ProgramFilesPath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+                var pluginDllPath = Path.Combine(ProgramFilesPath, "Winamp/Plugins/" + dspPluginDllName);
+                Console.WriteLine("Loading: " + pluginDllPath);
+                DSPPlugin dsp = DSPPluginLoader.LoadDSPPlugin(pluginDllPath, IntPtr.Zero);
+                if (dsp == null || dsp.Modules == null || dsp.Modules.Count == 0)
+                {
+                    Console.WriteLine(" - Error on LoadDSPPlugin(...)");
+                    return;
+                }
+
+                DSPModule mod = dsp.Modules[0];
+                Console.WriteLine(" + Plug-in: " + dsp.Description);
+                Console.WriteLine(" + Header version: " + dsp.DspHeaderVersion);
+                Console.WriteLine(" + Module: " + mod.Description);
+
+                // Initialize Plugin
+                int initResult = mod.Init();
+                if (initResult != 0)
+                {
+                    Console.WriteLine(" - Error on mod.Init(...)");
+                    return;
+                }
+
+                using (OggDecodeStream waveStream = new OggDecodeStream(File.OpenRead(audioFileName)))
+                using (WaveOut waveOut = new WaveOut(-1, waveStream.SamplesPerSecond, waveStream.BitsPerSample, waveStream.Channels))
+                {
+                    var bytesPerSample = waveStream.BitsPerSample / 8 * waveStream.Channels;
+
+                    // Create waveform buffer (and get pinned pointer)
+                    byte[] buffer = new byte[bytesPerSample * 4096];
+                    GCHandle bufferHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+                    IntPtr pBuffer = bufferHandle.AddrOfPinnedObject();
+
+                    while (true)
+                    {
+                        // read (to half of buffer)
+                        int read = waveStream.Read(buffer, 0, buffer.Length / 2);
+                        if (read == 0) { break; }
+
+                        // modify by dsp
+                        int samplesWritten = mod.ModifySample(pBuffer,
+                            read / bytesPerSample, waveStream.BitsPerSample,
+                            waveStream.Channels, waveStream.SamplesPerSecond);
+
+                        // write
+                        waveOut.Write(buffer, 0, samplesWritten * bytesPerSample);
+                        while (waveOut.EnqueuedBufferSize >= buffer.Length * 4)
+                        {
+                            System.Windows.Forms.Application.DoEvents();
+                            System.Threading.Thread.Sleep(1);
+                        }
+                    }
+
+                    // release buffer
+                    pBuffer = IntPtr.Zero;
+                    bufferHandle.Free();
+                }
+
+                mod.Quit();
+                dsp.Release();
+            }
+        }
+    }
+#endif
+
     /// <summary>
     /// DSP Plugin
     /// </summary>
@@ -294,143 +435,4 @@ namespace Tsukikage.DllPInvoke.WinampDspPlugin
             #endregion
         }
     }
-
-#if EXAMPLE_CODE
-    namespace Test
-    {
-        using System.Diagnostics;
-        using System.Runtime.InteropServices;
-        using Tsukikage.Audio;
-        using Tsukikage.DllPInvoke.WinampDspPlugin;
-        using Tsukikage.WinMM.WaveIO;
-
-        class TestClass
-        {
-            public static void Test(string[] args)
-            {
-                Test_EnumrateInstalledPlugins();
-                Test_PlayWithSATools();
-            }
-
-            /// <summary>
-            /// Test
-            /// </summary>
-            static void Test_EnumrateInstalledPlugins()
-            {
-                //Debug.Listeners.Add(new ConsoleTraceListener());
-
-                // Create ParentWindow
-                IntPtr parentHandle = IntPtr.Zero;
-                /*
-                MessageWindow f = new MessageWindow();
-                f.MessageHandlers.Add(0x400, (ref Message m) => { m.Result = new IntPtr(1); });
-                Application.DoEvents();
-                IntPtr parentHandle = f.Handle;
-                */
-
-                // find all installed plugins.
-                var ProgramFilesPath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-                var dllFiles = Directory.GetFiles(ProgramFilesPath + "/Winamp/Plugins", "dsp_*.dll");
-
-                // foreach plugin dll...
-                foreach (var dllPath in dllFiles)
-                {
-                    Console.WriteLine("Path: " + dllPath);
-
-                    // Since the window f does not provide Winamp APIs,
-                    // passing f.Handle will cause crash in loading dsp_sps.dll.
-                    // dsp_sps requires IPC_GET_API_SERVICE.
-                    DSPPlugin dsp = DSPPluginLoader.LoadDSPPlugin(dllPath, parentHandle);
-
-                    if (dsp == null)
-                    {
-                        Console.WriteLine(" - Error.");
-                        continue;
-                    }
-
-                    Console.WriteLine(" + Plug-in: " + dsp.Description);
-                    Console.WriteLine(" + Header version: " + dsp.DspHeaderVersion);
-
-                    for (int i = 0; i < dsp.Modules.Count; i++)
-                    {
-                        Console.WriteLine(" + Module #" + (i + 1) + ": " + dsp.Modules[i].Description);
-                    }
-
-                    dsp.Release();
-                }
-            }
-
-            /// <summary>
-            /// Test
-            /// </summary>
-            static void Test_PlayWithSATools()
-            {
-                string audioFileName = "./test.ogg";
-                string dspPluginDllName = "dsp_stereo_tool.dll";
-
-                // Load plugin
-                var ProgramFilesPath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-                var pluginDllPath = Path.Combine(ProgramFilesPath, "Winamp/Plugins/" + dspPluginDllName);
-                Console.WriteLine("Loading: " + pluginDllPath);
-                DSPPlugin dsp = DSPPluginLoader.LoadDSPPlugin(pluginDllPath, IntPtr.Zero);
-                if (dsp == null || dsp.Modules == null || dsp.Modules.Count == 0)
-                {
-                    Console.WriteLine(" - Error on LoadDSPPlugin(...)");
-                    return;
-                }
-
-                DSPModule mod = dsp.Modules[0];
-                Console.WriteLine(" + Plug-in: " + dsp.Description);
-                Console.WriteLine(" + Header version: " + dsp.DspHeaderVersion);
-                Console.WriteLine(" + Module: " + mod.Description);
-
-                // Initialize Plugin
-                int initResult = mod.Init();
-                if (initResult != 0)
-                {
-                    Console.WriteLine(" - Error on mod.Init(...)");
-                    return;
-                }
-
-                using (OggDecodeStream waveStream = new OggDecodeStream(File.OpenRead(audioFileName)))
-                using (WaveOut waveOut = new WaveOut(-1, waveStream.SamplesPerSecond, waveStream.BitsPerSample, waveStream.Channels))
-                {
-                    var bytesPerSample = waveStream.BitsPerSample / 8 * waveStream.Channels;
-
-                    // Create waveform buffer (and get pinned pointer)
-                    byte[] buffer = new byte[bytesPerSample * 4096];
-                    GCHandle bufferHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-                    IntPtr pBuffer = bufferHandle.AddrOfPinnedObject();
-
-                    while (true)
-                    {
-                        // read (to half of buffer)
-                        int read = waveStream.Read(buffer, 0, buffer.Length / 2);
-                        if (read == 0) { break; }
-
-                        // modify by dsp
-                        int samplesWritten = mod.ModifySample(pBuffer,
-                            read / bytesPerSample, waveStream.BitsPerSample,
-                            waveStream.Channels, waveStream.SamplesPerSecond);
-
-                        // write
-                        waveOut.Write(buffer, 0, samplesWritten * bytesPerSample);
-                        while (waveOut.EnqueuedBufferSize >= buffer.Length * 4)
-                        {
-                            System.Windows.Forms.Application.DoEvents();
-                            System.Threading.Thread.Sleep(1);
-                        }
-                    }
-
-                    // release buffer
-                    pBuffer = IntPtr.Zero;
-                    bufferHandle.Free();
-                }
-
-                mod.Quit();
-                dsp.Release();
-            }
-        }
-    }
-#endif
 }
