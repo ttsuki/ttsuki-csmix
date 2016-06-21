@@ -272,7 +272,7 @@ namespace Tsukikage.DirectShow.ComInterop
         int BufferCB(double sampleTime, IntPtr buffer, int bufferLen);
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [StructLayout(LayoutKind.Sequential)]
     public class AMMediaType
     {
         public Guid majorType;
@@ -315,7 +315,7 @@ namespace Tsukikage.DirectShow.ComInterop
         Output = 1,
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [StructLayout(LayoutKind.Sequential)]
     public class VideoInfoHeader
     {
         #region RECT rcSource
