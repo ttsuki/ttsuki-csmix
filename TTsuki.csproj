@@ -55,7 +55,7 @@
     <Compile Include="TTsuki.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\CSharpCompiler.cs" />
-    <Compile Include="Util\EntryAssembly.cs" />
+    <Compile Include="Util\EntryAssemblyInformation.cs" />
     <Compile Include="Util\ReflectionUtil.cs" />
     <Compile Include="Util\RingIndexer.cs" />
     <Compile Include="Util\StableSorter.cs" />
