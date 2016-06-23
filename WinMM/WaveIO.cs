@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
-using Tsukikage.Windows.Messaging;
 
 namespace Tsukikage.WinMM.WaveIO
 {
@@ -20,11 +19,15 @@ namespace Tsukikage.WinMM.WaveIO
         MessageThread eventHandler;
 
         public const int WaveMapper = -1;
+
+        /// <summary>
+        /// Native device handle.
+        /// </summary>
         public IntPtr Handle { get { return deviceHandle; } }
 
         /// <summary>
         /// Not played yet (contains playing data).
-        /// 再生が終わってないデータの量(Write単位)
+        /// 再生が終わってないデータの量(Write単位)を取得します。
         /// </summary>
         public int EnqueuedBufferSize { get { return enqueuedBufferSize; } }
 
@@ -50,17 +53,8 @@ namespace Tsukikage.WinMM.WaveIO
         {
             Win32.WaveFormatEx wfx = new Win32.WaveFormatEx(samplesPerSec, bitsPerSample, channels);
 
-            eventHandler = new MessageThread();
-            IntPtr ptr = new IntPtr(eventHandler.Win32ThreadID);
-
-            int mmret = Win32.waveOutOpen(out deviceHandle, (uint)deviceId, ref wfx, ptr, IntPtr.Zero, Win32.CALLBACK_THREAD);
-            if (mmret != Win32.MMSYSERR_NOERROR)
-            {
-                eventHandler.Dispose();
-                throw new Exception("デバイスが開けませんでした。(" + mmret + ")");
-            }
-
-            eventHandler.MessageHandlers[Win32.MM_WOM_DONE] = delegate(Message m)
+            eventHandler = new MessageThread(ThreadPriority.AboveNormal);
+            eventHandler.MessageHandlers[Win32.MM_WOM_DONE] = delegate (Message m)
             {
                 Win32.WaveHeader header = Win32.WaveHeader.FromIntPtr(m.LParam);
                 WaveBuffer buf = WaveBuffer.FromWaveHeader(header);
@@ -70,17 +64,25 @@ namespace Tsukikage.WinMM.WaveIO
                 if (OnDone != null)
                     OnDone();
             };
+
+            int mmret = Win32.waveOutOpen(out deviceHandle, (uint)deviceId, ref wfx, new IntPtr(eventHandler.Win32ThreadID), IntPtr.Zero, Win32.CALLBACK_THREAD);
+            if (mmret != Win32.MMSYSERR_NOERROR)
+            {
+                eventHandler.Dispose();
+                throw new Exception("Error on waveOutOpen(" + mmret + ")");
+            }
+
         }
 
         void EnsureOpened()
         {
             if (deviceHandle == IntPtr.Zero)
-                throw new InvalidOperationException("開いてないんだけど！");
+                throw new InvalidOperationException("Device is not open.");
         }
 
         /// <summary>
         /// Write data to WaveOut.
-        /// 音を出す
+        /// 音を出します。
         /// </summary>
         /// <param name="waveform">音</param>
         public void Write(byte[] waveform)
@@ -91,7 +93,7 @@ namespace Tsukikage.WinMM.WaveIO
 
         /// <summary>
         /// Write data to WaveOut.
-        /// 音を出す
+        /// 音を出します。
         /// </summary>
         /// <param name="waveform">音</param>
         /// <param name="offset">読み出す位置</param>
@@ -106,7 +108,7 @@ namespace Tsukikage.WinMM.WaveIO
 
         /// <summary>
         /// Write data to WaveOut.
-        /// 音を出す
+        /// 音を出します。
         /// </summary>
         /// <param name="src">音</param>
         /// <param name="length">バイト数</param>
@@ -120,7 +122,7 @@ namespace Tsukikage.WinMM.WaveIO
 
         /// <summary>
         /// Write data to WaveOut.
-        /// 音を出す
+        /// 音を出します。
         /// </summary>
         /// <param name="buffer">音が入ったバッファ</param>
         private void Write(WaveBuffer buffer)
@@ -133,7 +135,7 @@ namespace Tsukikage.WinMM.WaveIO
 
         /// <summary>
         /// Stop.
-        /// 止める。
+        /// 止めます。
         /// </summary>
         public void Stop()
         {
@@ -186,13 +188,12 @@ namespace Tsukikage.WinMM.WaveIO
     /// <summary>
     /// Win32 WaveIn制御クラス
     /// </summary>
-    [System.Security.SuppressUnmanagedCodeSecurity]
     public class WaveIn : IDisposable
     {
         public delegate void WaveInDataHandler(byte[] data);
 
         IntPtr deviceHandle = IntPtr.Zero;
-        MessageThread messageProc;
+        MessageThread eventHandler;
         public const int WaveMapper = -1;
 
         public IntPtr Handle { get { return deviceHandle; } }
@@ -222,8 +223,8 @@ namespace Tsukikage.WinMM.WaveIO
         {
             Win32.WaveFormatEx wfx = new Win32.WaveFormatEx(samplesPerSec, bitsPerSample, channels);
 
-            messageProc = new MessageThread();
-            messageProc.MessageHandlers[Win32.MM_WIM_DATA] = delegate(Message m)
+            eventHandler = new MessageThread(ThreadPriority.AboveNormal);
+            eventHandler.MessageHandlers[Win32.MM_WIM_DATA] = delegate (Message m)
             {
                 Win32.WaveHeader header = Win32.WaveHeader.FromIntPtr(m.LParam);
                 WaveBuffer buf = WaveBuffer.FromWaveHeader(header);
@@ -251,18 +252,18 @@ namespace Tsukikage.WinMM.WaveIO
                 }
             };
 
-            int mmret = Win32.waveInOpen(out deviceHandle, (uint)deviceId, ref wfx, new IntPtr(messageProc.Win32ThreadID), IntPtr.Zero, Win32.CALLBACK_THREAD);
+            int mmret = Win32.waveInOpen(out deviceHandle, (uint)deviceId, ref wfx, new IntPtr(eventHandler.Win32ThreadID), IntPtr.Zero, Win32.CALLBACK_THREAD);
             if (mmret != Win32.MMSYSERR_NOERROR)
             {
-                messageProc.Dispose();
-                throw new Exception("デバイスが開けませんでした。(" + mmret + ")");
+                eventHandler.Dispose();
+                throw new Exception("Error on waveInOpen. (ret=" + mmret + ")");
             }
         }
 
         void EnsureOpened()
         {
             if (deviceHandle == IntPtr.Zero)
-                throw new InvalidOperationException("開いてないんだけど！");
+                throw new InvalidOperationException("Device is not open.");
         }
 
         /// <summary>
@@ -285,7 +286,7 @@ namespace Tsukikage.WinMM.WaveIO
         {
             EnsureOpened();
             if (recording)
-                throw new InvalidOperationException("既に録音中");
+                throw new InvalidOperationException("Started already.");
 
             for (int i = 0; i < bufferCount; i++)
             {
@@ -298,7 +299,7 @@ namespace Tsukikage.WinMM.WaveIO
             int mmret = Win32.waveInStart(deviceHandle);
             if (mmret != Win32.MMSYSERR_NOERROR)
             {
-                throw new Exception("録音開始に失敗……？ (" + mmret + ")");
+                throw new Exception("Error on waveInStart. (ret=" + mmret + ")");
             }
             recording = true;
         }
@@ -327,7 +328,7 @@ namespace Tsukikage.WinMM.WaveIO
                 Stop();
                 Win32.waveInClose(deviceHandle);
                 deviceHandle = IntPtr.Zero;
-                messageProc.Dispose();
+                eventHandler.Dispose();
                 GC.SuppressFinalize(this);
             }
         }
@@ -356,7 +357,6 @@ namespace Tsukikage.WinMM.WaveIO
         }
     }
 
-    [System.Security.SuppressUnmanagedCodeSecurity]
     class WaveBuffer : IDisposable
     {
         GCHandle dataHandle;
@@ -420,8 +420,66 @@ namespace Tsukikage.WinMM.WaveIO
         }
     }
 
+    sealed class MessageThread : IDisposable, IMessageFilter
+    {
+        public delegate void CallbackDelegate(Message m);
+
+        Thread thread;
+        public int Win32ThreadID { get; private set; }
+        public Dictionary<int, CallbackDelegate> MessageHandlers { get; private set; }
+
+        public MessageThread(ThreadPriority threadPriority)
+        {
+            MessageHandlers = new Dictionary<int, CallbackDelegate>();
+            using (ManualResetEvent initialized = new ManualResetEvent(false))
+            {
+                thread = new Thread(delegate ()
+                {
+                    Application.AddMessageFilter(this);
+                    Application.DoEvents();
+                    Win32ThreadID = NativeMethods.GetCurrentThreadId();
+                    initialized.Set();
+                    Application.Run();
+                });
+                thread.Priority = threadPriority;
+                thread.Start();
+                initialized.WaitOne();
+            }
+        }
+
+        public void Dispose()
+        {
+            if (thread != null)
+            {
+                const int WM_QUIT = 0x0012;
+                NativeMethods.PostThreadMessage(Win32ThreadID, WM_QUIT, IntPtr.Zero, IntPtr.Zero);
+                thread.Join();
+                Win32ThreadID = 0;
+                thread = null;
+            }
+        }
+
+        bool IMessageFilter.PreFilterMessage(ref Message m)
+        {
+            CallbackDelegate handler;
+            if (MessageHandlers.TryGetValue(m.Msg, out handler))
+                handler(m);
+            return false;
+        }
+
+        static class NativeMethods
+        {
+            [DllImport("user32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool PostThreadMessage(int idThread, int msg, IntPtr wParam, IntPtr lParam);
+
+            [DllImport("kernel32.dll", SetLastError = true)]
+            public static extern int GetCurrentThreadId();
+        }
+    }
+
     [System.Security.SuppressUnmanagedCodeSecurity]
-    public static class Win32
+    static class Win32
     {
         public const int MMSYSERR_NOERROR = 0;
         public const int CALLBACK_WINDOW = 0x00010000;

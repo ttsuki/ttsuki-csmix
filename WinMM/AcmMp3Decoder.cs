@@ -37,11 +37,11 @@ namespace Tsukikage.WinMM.AcmMP3Decoder
             Win32.WaveFormatEx dst = new Win32.WaveFormatEx(44100, 16, 2);
             int mmret = Win32.acmFormatSuggest(IntPtr.Zero, ref src, ref dst, (uint)Win32.WaveFormatEx.SizeOfWaveFormatEx, Win32.ACM_FORMATSUGGESTF_WFORMATTAG);
             if (mmret != 0)
-                throw new Exception("このマシン、MP3デコードできないって言ってます (" + mmret + ")");
+                throw new Exception("Error on acmFormatSuggest. (ret=" + mmret + ") no mp3 codec found...?");
 
             mmret = Win32.acmStreamOpen(out deviceHandle, IntPtr.Zero, ref src, ref dst, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, 0);
             if (mmret != 0)
-                throw new Exception("デバイスが開けませんでした。(" + mmret + ")");
+                throw new Exception("Error on acmStreamOpen. (ret=" + mmret + ")");
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Tsukikage.WinMM.AcmMP3Decoder
         public byte[] Decode(byte[] mp3data)
         {
             if (deviceHandle == IntPtr.Zero) 
-                throw new InvalidOperationException("開いてないんだけど！");
+                throw new InvalidOperationException("Stream is not open.");
 
             byte[] input = new byte[buffer.Length + mp3data.Length];
             Array.Copy(buffer, input, buffer.Length);
@@ -120,7 +120,7 @@ namespace Tsukikage.WinMM.AcmMP3Decoder
         }
 
         [System.Security.SuppressUnmanagedCodeSecurity]
-        class Win32
+        private static class Win32
         {
             public const int MMSYSERR_NOERROR = 0;
 

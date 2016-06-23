@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using Tsukikage.Windows.Messaging;
 
 namespace Tsukikage.WinMM.MidiIO
 {
     /// <summary>
     /// Win32 MidiOut制御クラス
     /// </summary>
-    [System.Security.SuppressUnmanagedCodeSecurity]
     public class MidiOut : IDisposable
     {
         public delegate void MidiOutLongMessageDoneHandler();
@@ -20,11 +18,15 @@ namespace Tsukikage.WinMM.MidiIO
         MessageThread eventHandler;
 
         public const int MidiMapper = -1;
+        
+        /// <summary>
+        /// Native device handle.
+        /// </summary>
         public IntPtr Handle { get { return deviceHandle; } }
 
         /// <summary>
         /// Not played yet (contains playing data).
-        /// 再生が終わってないデータの量(Write単位)
+        /// 再生が終わってないデータの量(Write単位)を取得します。
         /// </summary>
         public int EnqueuedBufferSize { get { return enqueuedBufferSize; } }
 
@@ -39,12 +41,13 @@ namespace Tsukikage.WinMM.MidiIO
         public event MidiOutLongMessageDoneHandler OnDone;
 
         /// <summary>
-        /// Open MidiOut. MidiOutを開く
+        /// Open MidiOut.
+        /// MidiOutを開きます。
         /// </summary>
         /// <param name="deviceId">MidiOut.MidiMapper or index of GetDeviceNames(). MidiOut.MidiMapperか、GetDeviceNames()のindex</param>
         public MidiOut(int deviceId)
         {
-            eventHandler = new MessageThread();
+            eventHandler = new MessageThread(ThreadPriority.AboveNormal);
             eventHandler.MessageHandlers[Win32.MM_MOM_DONE] = delegate(Message m)
             {
                 Win32.MidiHeader hdr = Win32.MidiHeader.FromIntPtr(m.LParam);
@@ -60,19 +63,19 @@ namespace Tsukikage.WinMM.MidiIO
             if (mmret != Win32.MMSYSERR_NOERROR)
             {
                 eventHandler.Dispose();
-                throw new Exception("デバイスが開けませんでした。(" + mmret + ")");
+                throw new Exception("Error on midiOutOpen. (ret=" + mmret + ")");
             }
         }
 
         void EnsureOpened()
         {
             if (deviceHandle == IntPtr.Zero)
-                throw new InvalidOperationException("開いてないんだけど！");
+                throw new InvalidOperationException("Device is not open.");
         }
 
         /// <summary>
         /// Send short midi message.
-        /// 短いmidiデータを送ります
+        /// 短いmidiデータを送ります。
         /// </summary>
         /// <param name="data">データ</param>
         public void ShortMessage(uint data)
@@ -83,7 +86,7 @@ namespace Tsukikage.WinMM.MidiIO
 
         /// <summary>
         /// Send long midi message.
-        /// 長いmidiデータを送ります
+        /// 長いmidiデータを送ります。
         /// </summary>
         /// <param name="data">データ</param>
         public void Write(params byte[] data)
@@ -94,7 +97,7 @@ namespace Tsukikage.WinMM.MidiIO
 
         /// <summary>
         /// Send long midi message.
-        /// 長いmidiデータを送ります
+        /// 長いmidiデータを送ります。
         /// </summary>
         /// <param name="data">データ</param>
         /// <param name="offset">読み出す位置</param>
@@ -110,7 +113,7 @@ namespace Tsukikage.WinMM.MidiIO
 
         /// <summary>
         /// Send long midi message.
-        /// 長いmidiデータを送ります
+        /// 長いmidiデータを送ります。
         /// </summary>
         /// <param name="src">データ</param>
         /// <param name="length">読み出すバイト数</param>
@@ -125,7 +128,7 @@ namespace Tsukikage.WinMM.MidiIO
 
         /// <summary>
         /// Send long midi message.
-        /// 長いmidiデータを送ります
+        /// 長いmidiデータを送ります。
         /// </summary>
         /// <param name="buffer">メッセージが入ったバッファ</param>
         private void Write(MidiBuffer buffer)
@@ -138,7 +141,7 @@ namespace Tsukikage.WinMM.MidiIO
 
         /// <summary>
         /// Stop.
-        /// 止める。
+        /// 再生を止め、ます。
         /// </summary>
         public void Stop()
         {
@@ -147,11 +150,10 @@ namespace Tsukikage.WinMM.MidiIO
             while (enqueuedBufferSize != 0)
                 Thread.Sleep(0);
 
-            // Pedalを放す。, All Sound Off,
             for (uint i = 0; i < 16; i++)
             {
-                ShortMessage(0x0040B0 | i);
-                ShortMessage(0x007BB0 | i);
+                ShortMessage(0x0040B0 | i); // Pedal = 0
+                ShortMessage(0x007BB0 | i); // All Sound Off
             }
         }
 
@@ -199,19 +201,22 @@ namespace Tsukikage.WinMM.MidiIO
     /// <summary>
     /// Win32 MidiIn 制御クラス
     /// </summary>
-    [System.Security.SuppressUnmanagedCodeSecurity]
     public class MidiIn : IDisposable
     {
         public delegate void MidiInLongMessageHandler(byte[] data);
         public delegate void MidiInShortMessageHandler(uint data);
 
         IntPtr deviceHandle = IntPtr.Zero;
+        int enqueuedBufferCount = 0;
+        MessageThread eventHandler;
+        volatile bool recording = false;
+
+        /// <summary>
+        /// Native device handle.
+        /// </summary>
         public IntPtr Handle { get { return deviceHandle; } }
 
-        MessageThread messageProc;
-        volatile bool recording = false;
-       
-        /// <summary>
+         /// <summary>
         /// On long message arrival.
         /// 長いメッセージが来たときに呼ばれます。
         /// </summary>
@@ -231,7 +236,6 @@ namespace Tsukikage.WinMM.MidiIO
         /// </remarks>
         public event MidiInShortMessageHandler OnShortMsg;
 
-        int enqueuedBufferCount = 0;
         
         /// <summary>
         /// Open MidiIn.
@@ -240,8 +244,8 @@ namespace Tsukikage.WinMM.MidiIO
         /// <param name="deviceId">index of GetDeviceNames(). GetDeviceNames()のindex</param>
         public MidiIn(uint deviceId)
         {
-            messageProc = new MessageThread();
-            messageProc.MessageHandlers[Win32.MM_MIM_LONGDATA] = delegate(Message m)
+            eventHandler = new MessageThread(ThreadPriority.AboveNormal);
+            eventHandler.MessageHandlers[Win32.MM_MIM_LONGDATA] = delegate(Message m)
             {
                 Win32.MidiHeader header = Win32.MidiHeader.FromIntPtr(m.LParam);
                 MidiBuffer buf = MidiBuffer.FromMidiHeader(header);
@@ -269,25 +273,25 @@ namespace Tsukikage.WinMM.MidiIO
                 }
             };
 
-            messageProc.MessageHandlers[Win32.MM_MIM_DATA] = delegate(Message m)
+            eventHandler.MessageHandlers[Win32.MM_MIM_DATA] = delegate(Message m)
             {
                 if (OnShortMsg != null)
                     OnShortMsg((uint)m.LParam);
             };
 
-            int mmret = Win32.midiInOpen(out deviceHandle, deviceId, new IntPtr(messageProc.Win32ThreadID), IntPtr.Zero, Win32.CALLBACK_THREAD);
+            int mmret = Win32.midiInOpen(out deviceHandle, deviceId, new IntPtr(eventHandler.Win32ThreadID), IntPtr.Zero, Win32.CALLBACK_THREAD);
             
             if (mmret != Win32.MMSYSERR_NOERROR)
             {
-                messageProc.Dispose();
-                throw new Exception("デバイスが開けませんでした。(" + mmret + ")");
+                eventHandler.Dispose();
+                throw new Exception("Error on midiInOpen. (ret=" + mmret + ")");
             }
         }
 
         void EnsureOpened()
         {
             if (deviceHandle == IntPtr.Zero)
-                throw new InvalidOperationException("開いてないんだけど！");
+                throw new InvalidOperationException("Device is not open.");
         }
 
         /// <summary>
@@ -310,7 +314,7 @@ namespace Tsukikage.WinMM.MidiIO
         {
             EnsureOpened();            
             if (recording)
-                throw new InvalidOperationException("既に録音中");
+                throw new InvalidOperationException("Started already.");
 
             for (int i = 0; i < bufferCount; i++)
             {
@@ -322,7 +326,7 @@ namespace Tsukikage.WinMM.MidiIO
             int mmret = Win32.midiInStart(deviceHandle);
             if (mmret != Win32.MMSYSERR_NOERROR)
             {
-                throw new Exception("録音開始に失敗……？ (" + mmret + ")");
+                throw new Exception("Error on midiInStart. (ret = " + mmret + ")");
             }
 
             recording = true;
@@ -351,7 +355,7 @@ namespace Tsukikage.WinMM.MidiIO
                 OnLongMsg = null;
                 OnShortMsg = null;
                 Stop();
-                messageProc.Dispose();
+                eventHandler.Dispose();
                 Win32.midiInClose(deviceHandle);
                 deviceHandle = IntPtr.Zero;
                 GC.SuppressFinalize(this);
@@ -382,7 +386,6 @@ namespace Tsukikage.WinMM.MidiIO
         }
     }
 
-    [System.Security.SuppressUnmanagedCodeSecurity]
     class MidiBuffer : IDisposable
     {
         GCHandle dataHandle;
@@ -450,6 +453,65 @@ namespace Tsukikage.WinMM.MidiIO
         //{
         //    /* don't free buffer */
         //}
+    }
+
+    sealed class MessageThread : IDisposable, IMessageFilter
+    {
+        public delegate void CallbackDelegate(Message m);
+
+        Thread thread;
+        public int Win32ThreadID { get; private set; }
+        public Dictionary<int, CallbackDelegate> MessageHandlers { get; private set; }
+
+        public MessageThread(ThreadPriority threadPriority)
+        {
+            MessageHandlers = new Dictionary<int, CallbackDelegate>();
+            using (ManualResetEvent initialized = new ManualResetEvent(false))
+            {
+                thread = new Thread(delegate ()
+                {
+                    Application.AddMessageFilter(this);
+                    Application.DoEvents();
+                    Win32ThreadID = NativeMethods.GetCurrentThreadId();
+                    initialized.Set();
+                    Application.Run();
+                });
+                thread.Priority = threadPriority;
+                thread.Start();
+                initialized.WaitOne();
+            }
+        }
+
+        public void Dispose()
+        {
+            if (thread != null)
+            {
+                const int WM_QUIT = 0x0012;
+                NativeMethods.PostThreadMessage(Win32ThreadID, WM_QUIT, IntPtr.Zero, IntPtr.Zero);
+                thread.Join();
+                Win32ThreadID = 0;
+                thread = null;
+            }
+        }
+
+        bool IMessageFilter.PreFilterMessage(ref Message m)
+        {
+            CallbackDelegate handler;
+            if (MessageHandlers.TryGetValue(m.Msg, out handler))
+                handler(m);
+            return false;
+        }
+
+        static class NativeMethods
+        {
+
+            [DllImport("user32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool PostThreadMessage(int idThread, int msg, IntPtr wParam, IntPtr lParam);
+
+            [DllImport("kernel32.dll", SetLastError = true)]
+            public static extern int GetCurrentThreadId();
+        }
     }
 
     [System.Security.SuppressUnmanagedCodeSecurity]
