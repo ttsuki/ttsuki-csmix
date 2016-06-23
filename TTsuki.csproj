@@ -60,7 +60,7 @@
     <Compile Include="Util\RingIndexer.cs" />
     <Compile Include="Util\StableSorter.cs" />
     <Compile Include="Util\TextFile.cs" />
-    <Compile Include="Util\Var.cs" />
+    <Compile Include="Util\SharpJson.cs" />
     <Compile Include="WindowsUtil\FontBitmapLoder.cs" />
     <Compile Include="WindowsUtil\FontFileLoader.cs" />
     <Compile Include="WindowsUtil\KeyboardHook.cs" />
