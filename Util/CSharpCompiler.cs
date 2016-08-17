@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Reflection;
 using Microsoft.CSharp;
 using System.CodeDom.Compiler;
@@ -103,9 +102,9 @@ namespace Tsukikage.Util
         public static Assembly CompileFromSource(CompilerParameters param, IDictionary<string, string> sourceFileNameAndCodePairs)
         {
             KeyValuePair<string, string>[] kvp = new KeyValuePair<string, string>[sourceFileNameAndCodePairs.Count];
-            Array.Sort(kvp);
             sourceFileNameAndCodePairs.CopyTo(kvp, 0);
-            string[] sourceFileNames = Array.ConvertAll(kvp, k => k.Value);
+            Array.Sort(kvp);
+            string[] sourceFileNames = Array.ConvertAll(kvp, k => k.Key);
             string[] sourceCodes = Array.ConvertAll(kvp, k => k.Value);
 
             // compile it
